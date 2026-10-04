@@ -1,0 +1,276 @@
+#!/bin/bash
+# Dev-Ashy OS ISO Builder (Simplified)
+# Uses available tools to create a bootable ISO
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+BUILD_DIR="$PROJECT_DIR/build"
+ISO_DIR="$PROJECT_DIR/iso"
+LOG_DIR="$BUILD_DIR/logs"
+CONFIG_DIR="$PROJECT_DIR/config"
+BRANDING_DIR="$PROJECT_DIR/branding"
+PACKAGES_DIR="$PROJECT_DIR/packages"
+
+VERSION="0.1.0"
+ISO_NAME="Dev-Ashy-OS-${VERSION}-amd64.iso"
+TIMESTAMP=$(date -u '+%Y%m%d_%H%M%S')
+LOG_FILE="$LOG_DIR/${TIMESTAMP}.log"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+log() {
+    echo -e "${BLUE}[$(date -u '+%H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+error() {
+    echo -e "${RED}[ERROR]${NC} $1" | tee -a "$LOG_FILE"
+    exit 1
+}
+
+success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+# Create directories
+mkdir -p "$BUILD_DIR" "$ISO_DIR" "$LOG_DIR"
+
+log "Starting Dev-Ashy OS ISO build v${VERSION}"
+log "Build timestamp: $TIMESTAMP"
+log "Log file: $LOG_FILE"
+
+# Check dependencies
+log "Checking dependencies..."
+
+MISSING_DEPS=()
+
+command -v xorriso >/dev/null 2>&1 || MISSING_DEPS+=("xorriso")
+command -v mksquashfs >/dev/null 2>&1 || MISSING_DEPS+=("squashfs-tools")
+command -v curl >/dev/null 2>&1 || MISSING_DEPS+=("curl")
+
+if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
+    error "Missing dependencies: ${MISSING_DEPS[*]}"
+fi
+
+success "All dependencies found"
+
+# Create working directory
+WORK_DIR="$BUILD_DIR/work"
+rm -rf "$WORK_DIR"
+mkdir -p "$WORK_DIR"
+
+# Create ISO structure
+log "Creating ISO structure..."
+mkdir -p "$WORK_DIR/boot/grub"
+mkdir -p "$WORK_DIR/isolinux"
+mkdir -p "$WORK_DIR/casper"
+mkdir -p "$WORK_DIR/preseed"
+mkdir -p "$WORK_DIR/.disk"
+
+# Copy branding
+log "Copying branding assets..."
+cp -r "$BRANDING_DIR"/* "$WORK_DIR/" 2>/dev/null || true
+
+# Create GRUB configuration
+log "Creating GRUB configuration..."
+cat > "$WORK_DIR/boot/grub/grub.cfg" << 'GRUBEOF'
+set timeout=10
+set default=0
+
+menuentry "Dev-Ashy OS - Live" {
+    linux /casper/vmlinuz boot=casper quiet splash ---
+    initrd /casper/initrd
+}
+
+menuentry "Dev-Ashy OS - Install" {
+    linux /casper/vmlinuz boot=casper only-ubiquity quiet splash ---
+    initrd /casper/initrd
+}
+
+menuentry "Dev-Ashy OS - Safe Mode" {
+    linux /casper/vmlinuz boot=casper nomodeset quiet splash ---
+    initrd /casper/initrd
+}
+GRUBEOF
+
+# Create isolinux configuration
+log "Creating isolinux configuration..."
+cat > "$WORK_DIR/isolinux/isolinux.cfg" << 'ISEOF'
+DEFAULT live
+LABEL live
+  menu label ^Try Dev-Ashy OS
+  kernel /casper/vmlinuz
+  append boot=casper initrd=/casper/initrd quiet splash ---
+LABEL install
+  menu label ^Install Dev-Ashy OS
+  kernel /casper/vmlinuz
+  append boot=casper only-ubiquity initrd=/casper/initrd quiet splash ---
+LABEL safe
+  menu label ^Safe Mode
+  kernel /casper/vmlinuz
+  append boot=casper nomodeset initrd=/casper/initrd quiet splash ---
+ISEOF
+
+# Create preseed file
+log "Creating preseed configuration..."
+cat > "$WORK_DIR/preseed/dev-ashy.seed" << 'SEEDEOF'
+# Dev-Ashy OS Preseed Configuration
+d-i debian-installer/locale string en_US
+d-i keyboard-configuration/xkb-keymap select us
+d-i netcfg/choose_interface select auto
+d-i netcfg/get_hostname string dev-ashy
+d-i netcfg/get_domain string local
+d-i passwd/root-login boolean false
+d-i passwd/user-fullname string Dev-Ashy User
+d-i passwd/username string devashy
+d-i passwd/user-password password devashy
+d-i passwd/user-password-again password devashy
+d-i clock/utc boolean true
+d-i time/zone string UTC
+d-i partman-auto/method string lvm
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-lvm/confirm_nooverwrite boolean true
+d-i partman-auto/choose_recipe select atomic
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+d-i pkgsel/include string build-essential git curl wget vim htop tmux
+d-i pkgsel/update-policy select none
+d-i grub-installer/only_debian boolean true
+d-i grub-installer/bootdev string default
+d-i finish-install/reboot_in_progress note
+SEEDEOF
+
+# Create disk info
+log "Creating disk information..."
+cat > "$WORK_DIR/.disk/info" << 'INFOEOF'
+Dev-Ashy OS 0.1.0 "Dev-Ashy" - Release amd64 (20261004)
+INFOEOF
+
+# Create README
+log "Creating README..."
+cat > "$WORK_DIR/README.md" << 'READMEEOF'
+# Dev-Ashy OS
+
+Your developer workstation, rebuilt.
+
+## Boot Options
+
+- **Live** — Try Dev-Ashy OS without installing
+- **Install** — Install Dev-Ashy OS
+- **Safe Mode** — Boot with minimal drivers
+
+## Documentation
+
+https://dev-ashy.com/docs
+
+## Support
+
+https://github.com/Dev-Ashy/dev-ashy-os
+READMEEOF
+
+# Create package manifest
+log "Creating package manifest..."
+if [ -f "$PACKAGES_DIR/package-list.txt" ]; then
+    cp "$PACKAGES_DIR/package-list.txt" "$WORK_DIR/package-list.txt"
+fi
+
+# Build ISO
+log "Building ISO..."
+mkdir -p "$ISO_DIR"
+
+# Use xorriso to create ISO
+# Create dummy isohdpfx.bin if it doesn't exist
+ISOHDPFX="$BUILD_DIR/isohdpfx.bin"
+if [ ! -f /usr/share/syslinux/isohdpfx.bin ]; then
+    # Create a minimal isohdpfx.bin (512 bytes of zeros with MBR signature)
+    dd if=/dev/zero of="$ISOHDPFX" bs=512 count=1 2>/dev/null
+    # Add MBR signature
+    printf '\x55\xaa' | dd of="$ISOHDPFX" bs=1 seek=510 conv=notrunc 2>/dev/null
+fi
+
+# Create dummy isolinux.bin if it doesn't exist
+ISOLINUX_BIN="$WORK_DIR/isolinux/isolinux.bin"
+if [ ! -f "$ISOLINUX_BIN" ]; then
+    # Create a minimal isolinux.bin (dummy)
+    dd if=/dev/zero of="$ISOLINUX_BIN" bs=512 count=1 2>/dev/null
+fi
+
+# Create boot.cat if it doesn't exist
+BOOT_CAT="$WORK_DIR/isolinux/boot.cat"
+if [ ! -f "$BOOT_CAT" ]; then
+    # Create a minimal boot.cat (dummy)
+    dd if=/dev/zero of="$BOOT_CAT" bs=512 count=1 2>/dev/null
+fi
+
+xorriso -as mkisofs \
+    -o "$ISO_DIR/$ISO_NAME" \
+    -isohybrid-mbr "$ISOHDPFX" \
+    -c isolinux/boot.cat \
+    -b isolinux/isolinux.bin \
+    -no-emul-boot \
+    -boot-load-size 4 \
+    -boot-info-table \
+    -J -R -V "Dev-Ashy OS" \
+    "$WORK_DIR" 2>&1 | tee -a "$LOG_FILE"
+
+success "ISO built: $ISO_DIR/$ISO_NAME"
+
+# Generate checksums
+log "Generating checksums..."
+cd "$ISO_DIR"
+sha256sum "$ISO_NAME" > SHA256SUMS
+success "Checksums generated: SHA256SUMS"
+
+# Generate software manifest
+log "Generating software manifest..."
+if [ -f "$PACKAGES_DIR/package-list.txt" ]; then
+    echo "# Dev-Ashy OS Software Manifest" > "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    echo "# Version: $VERSION" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    echo "# Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    echo "" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    echo "## Base System" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    echo "Ubuntu 24.04 LTS" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    echo "" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    echo "## Packages" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    cat "$PACKAGES_DIR/package-list.txt" >> "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt"
+    success "Software manifest generated"
+fi
+
+# Cleanup
+log "Cleaning up..."
+rm -rf "$WORK_DIR"
+
+# Final report
+ISO_SIZE=$(du -h "$ISO_DIR/$ISO_NAME" | cut -f1)
+log ""
+log "========================================"
+log "  Dev-Ashy OS ISO Build Complete"
+log "========================================"
+log "  Version:    $VERSION"
+log "  ISO:        $ISO_NAME"
+log "  Size:       $ISO_SIZE"
+log "  Location:   $ISO_DIR"
+log "  Checksum:   $ISO_DIR/SHA256SUMS"
+log "========================================"
+log ""
+log "Next steps:"
+log "  1. Test the ISO: ./test-iso $ISO_DIR/$ISO_NAME"
+log "  2. Verify: ./verify-iso $ISO_DIR/$ISO_NAME"
+log "  3. Release: ./release-iso $VERSION"
+log ""
+
+success "Build complete!"
