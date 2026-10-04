@@ -1,0 +1,84 @@
+#!/bin/bash
+# Release Dev-Ashy OS ISO
+# Usage: ./release-iso <version>
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+ISO_DIR="$PROJECT_DIR/iso"
+RELEASE_DIR="$PROJECT_DIR/releases/iso"
+
+VERSION="${1:-0.1.0}"
+ISO_NAME="Dev-Ashy-OS-${VERSION}-amd64.iso"
+
+if [ ! -f "$ISO_DIR/$ISO_NAME" ]; then
+    echo "Error: ISO not found: $ISO_DIR/$ISO_NAME"
+    exit 1
+fi
+
+mkdir -p "$RELEASE_DIR"
+
+echo "Releasing Dev-Ashy OS v${VERSION}..."
+
+# Copy ISO to release directory
+cp "$ISO_DIR/$ISO_NAME" "$RELEASE_DIR/"
+
+# Copy checksums
+if [ -f "$ISO_DIR/SHA256SUMS" ]; then
+    cp "$ISO_DIR/SHA256SUMS" "$RELEASE_DIR/"
+fi
+
+# Copy software manifest
+if [ -f "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt" ]; then
+    cp "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt" "$RELEASE_DIR/"
+fi
+
+# Create release notes
+cat > "$RELEASE_DIR/RELEASE-NOTES.md" << EOF
+# Dev-Ashy OS v${VERSION}
+
+## Release Date
+$(date -u '+%Y-%m-%d')
+
+## What's New
+- Initial release of Dev-Ashy OS
+- Ubuntu 24.04 LTS base
+- Dev-Ashy branding and themes
+- Developer tools pre-installed
+- AI tooling support
+- Security tools
+- Mobile development support
+
+## System Requirements
+- 64-bit processor
+- 4 GB RAM (8 GB recommended)
+- 25 GB disk space
+- USB drive for installation
+
+## Installation
+1. Download the ISO
+2. Create bootable USB
+3. Boot from USB
+4. Follow installer
+
+## Verification
+- SHA256: $(sha256sum "$ISO_DIR/$ISO_NAME" | cut -d' ' -f1)
+
+## Known Issues
+- This is an alpha release
+- Some features may not work as expected
+- Please report issues on GitHub
+
+## Download
+- ISO: $ISO_NAME
+- Size: $(du -h "$ISO_DIR/$ISO_NAME" | cut -f1)
+EOF
+
+echo "Release created: $RELEASE_DIR"
+echo ""
+echo "Files:"
+ls -lh "$RELEASE_DIR"
+echo ""
+echo "To create a GitHub release:"
+echo "  gh release create v${VERSION} $RELEASE_DIR/* --title \"Dev-Ashy OS v${VERSION}\" --notes \"Initial release\""

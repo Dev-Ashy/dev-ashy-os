@@ -1,0 +1,98 @@
+# Dev-Ashy OS Package List
+# Format: package|version|source|reason
+
+# Base System
+ubuntu-standard|24.04|ubuntu|Base system
+ubuntu-desktop|24.04|ubuntu|Desktop environment
+gnome-shell|24.04|ubuntu|GNOME desktop
+gnome-terminal|24.04|ubuntu|Terminal emulator
+
+# Development Tools
+git|2.43|ubuntu|Version control
+git-lfs|3.5|ubuntu|Git large file storage
+gh|2.40|github|GitHub CLI
+nodejs|20.11|ubuntu|JavaScript runtime
+npm|10.2|ubuntu|Node package manager
+pnpm|8.15|npm|Fast package manager
+python3|3.12|ubuntu|Python runtime
+python3-pip|24.0|ubuntu|Python package manager
+python3-venv|3.12|ubuntu|Python virtual environments
+golang-go|1.22|ubuntu|Go runtime
+rustc|1.75|ubuntu|Rust compiler
+cargo|1.75|ubuntu|Rust package manager
+default-jdk|17|ubuntu|Java JDK
+build-essential|24.04|ubuntu|Build tools
+cmake|3.28|ubuntu|Build system
+ninja-build|1.11|ubuntu|Fast build system
+
+# AI Tools
+ollama|0.1.45|ollama|Local AI models
+openai|1.13|pip|OpenAI API client
+anthropic|0.20|pip|Anthropic API client
+langchain|0.1|pip|LLM framework
+transformers|4.38|pip|Hugging Face transformers
+torch|2.2|pip|PyTorch
+tensorflow|2.15|pip|TensorFlow
+numpy|1.26|pip|Numerical computing
+pandas|2.2|pip|Data analysis
+scikit-learn|1.4|pip|Machine learning
+
+# Security Tools
+nmap|7.94|ubuntu|Network scanner
+metasploit-framework|6.3|ubuntu|Penetration testing
+sqlmap|1.7|ubuntu|SQL injection tool
+nikto|2.5|ubuntu|Web scanner
+dirb|2.2|ubuntu|Directory brute forcer
+gobuster|3.6|ubuntu|Web brute forcer
+hydra|9.5|ubuntu|Password cracker
+john|1.9|ubuntu|Password cracker
+hashcat|6.2|ubuntu|Password cracker
+aircrack-ng|1.7|ubuntu|WiFi security
+wireshark|4.2|ubuntu|Network analyzer
+tcpdump|4.99|ubuntu|Packet analyzer
+netcat|1.10|ubuntu|Network utility
+socat|1.8|ubuntu|Network utility
+steghide|0.5|ubuntu|Steganography
+binwalk|2.3|ubuntu|Firmware analysis
+radare2|5.9|ubuntu|Reverse engineering
+ghidra|11.0|nsa|Reverse engineering
+
+# Mobile Development
+openjdk-17-jdk|17|ubuntu|Android development
+android-sdk|24.04|ubuntu|Android SDK
+expo-cli|0.18|npm|Expo CLI
+react-native-cli|2.0|npm|React Native CLI
+
+# Web Development
+firefox|121|ubuntu|Web browser
+chromium-browser|120|ubuntu|Web browser
+code|1.85|microsoft|VS Code
+postman|10.20|postman|API testing
+
+# Creative Tools
+ffmpeg|6.1|ubuntu|Video/audio processing
+obs-studio|30|ubuntu|Streaming/recording
+gimp|2.10|ubuntu|Image editing
+inkscape|1.3|ubuntu|Vector graphics
+blender|4.0|ubuntu|3D modeling
+audacity|3.4|ubuntu|Audio editing
+kdenlive|23.08|ubuntu|Video editing
+
+# System Tools
+htop|3.3|ubuntu|Process viewer
+tmux|3.4|ubuntu|Terminal multiplexer
+vim|9.0|ubuntu|Text editor
+neovim|0.9|ubuntu|Modern vim
+curl|8.5|ubuntu|HTTP client
+wget|1.21|ubuntu|File downloader
+unzip|6.0|ubuntu|Archive utility
+zip|3.0|ubuntu|Archive utility
+tree|2.1|ubuntu|Directory listing
+jq|1.7|ubuntu|JSON processor
+ripgrep|14.1|ubuntu|Fast search
+fd|8.7|ubuntu|Fast find
+bat|0.24|ubuntu|Syntax highlighting cat
+exa|0.11|ubuntu|Modern ls
+zoxide|0.9|ubuntu|Smart cd
+fzf|0.44|ubuntu|Fuzzy finder
+starship|1.17|ubuntu|Shell prompt

@@ -1,0 +1,40 @@
+#!/bin/bash
+# Install mobile development tools
+# Usage: ./install-mobile-tools
+
+set -e
+
+echo "Installing mobile development tools..."
+
+# Install React Native CLI
+npm install -g @react-native-community/cli
+
+# Install Expo CLI
+npm install -g expo-cli
+
+# Install Android SDK
+apt-get install -y -qq \
+    openjdk-17-jdk \
+    android-sdk \
+    android-sdk-platform-tools
+
+# Set up Android environment
+echo "export ANDROID_HOME=/usr/lib/android-sdk" >> /etc/profile
+echo "export PATH=\$PATH:\$ANDROID_HOME/tools:\$ANDROID_HOME/platform-tools" >> /etc/profile
+
+# Install iOS tools (macOS only)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install cocoapods
+fi
+
+echo "Mobile development tools installed!"
+echo ""
+echo "To create a new project:"
+echo "  npx create-expo-app my-app"
+echo ""
+echo "To run on Android:"
+echo "  cd my-app && npx expo start --android"
+echo ""
+echo "To run on iOS:"
+echo "  cd my-app && npx expo start --ios"
+echo ""

@@ -1,0 +1,30 @@
+#!/bin/bash
+# Install additional development tools
+# Usage: ./install-dev-tools
+
+set -e
+
+echo "Installing additional development tools..."
+
+# Install Node.js tools
+npm install -g pnpm yarn typescript @angular/cli @vue/cli create-react-app
+
+# Install Python tools
+pip3 install --upgrade pip
+pip3 install virtualenv pipenv poetry
+
+# Install Go tools
+go install golang.org/x/tools/cmd/goimports@latest
+
+# Install Rust tools
+rustup component add rustfmt clippy
+
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+usermod -aG docker $SUDO_USER
+
+# Install Kubernetes tools
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+echo "Development tools installed!"

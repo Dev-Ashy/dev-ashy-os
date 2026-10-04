@@ -1,0 +1,153 @@
+#!/bin/bash
+# Dev-Ashy OS First-Boot Setup
+# This script runs on first boot to configure the system
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}"
+echo "========================================"
+echo "  Dev-Ashy OS — First Boot Setup"
+echo "========================================"
+echo -e "${NC}"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${RED}Please run as root${NC}"
+    exit 1
+fi
+
+# Update system
+echo -e "${BLUE}[1/5]${NC} Updating system..."
+apt-get update -qq
+apt-get upgrade -y -qq
+
+# Install base tools
+echo -e "${BLUE}[2/5]${NC} Installing base tools..."
+apt-get install -y -qq \
+    git \
+    curl \
+    wget \
+    vim \
+    htop \
+    tmux \
+    build-essential \
+    software-properties-common
+
+# Install development tools
+echo -e "${BLUE}[3/5]${NC} Installing development tools..."
+apt-get install -y -qq \
+    nodejs \
+    npm \
+    python3 \
+    python3-pip \
+    python3-venv \
+    golang-go \
+    rustc \
+    cargo \
+    default-jdk
+
+# Install AI tools
+echo -e "${BLUE}[4/5]${NC} Installing AI tools..."
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Install GitHub CLI
+type -p curl >/dev/null || (apt-get update && apt-get install -y curl)
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+apt-get update -qq
+apt-get install -y -qq gh
+
+# Install security tools
+echo -e "${BLUE}[5/5]${NC} Installing security tools..."
+apt-get install -y -qq \
+    nmap \
+    net-tools \
+    wireshark \
+    aircrack-ng \
+    john \
+    hashcat
+
+# Configure Git
+echo -e "${BLUE}[6/6]${NC} Configuring Git..."
+git config --global init.defaultBranch main
+git config --global core.editor vim
+
+# Create welcome message
+cat > /etc/update-motd.d/99-dev-ashy << 'EOF'
+#!/bin/bash
+echo ""
+echo "  ╔═══════════════════════════════════════╗"
+echo "  ║          Dev-Ashy OS                  ║"
+echo "  ║    Your developer workstation         ║"
+echo "  ╚═══════════════════════════════════════╝"
+echo ""
+echo "  Quick commands:"
+echo "    dev-ashy-setup    — Run setup again"
+echo "    dev-ashy-status   — System status"
+echo "    dev-ashy-update   — Update system"
+echo ""
+echo "  Documentation: https://dev-ashy.com/docs"
+echo "  GitHub: https://github.com/Dev-Ashy"
+echo ""
+EOF
+chmod +x /etc/update-motd.d/99-dev-ashy
+
+# Create system info script
+cat > /usr/bin/dev-ashy-status << 'EOF'
+#!/bin/bash
+echo "========================================"
+echo "  Dev-Ashy OS — System Status"
+echo "========================================"
+echo ""
+echo "  OS: $(. /etc/os-release && echo $PRETTY_NAME)"
+echo "  Kernel: $(uname -r)"
+echo "  Uptime: $(uptime -p)"
+echo ""
+echo "  CPU: $(nproc) cores"
+echo "  RAM: $(free -h | awk '/^Mem:/ {print $3 "/" $2}')"
+echo "  Disk: $(df -h / | awk 'NR==2 {print $3 "/" $2 " (" $5 " used)"}')"
+echo ""
+echo "  Node.js: $(node --version 2>/dev/null || echo 'not installed')"
+echo "  Python: $(python3 --version 2>/dev/null || echo 'not installed')"
+echo "  Go: $(go version 2>/dev/null || echo 'not installed')"
+echo "  Rust: $(rustc --version 2>/dev/null || echo 'not installed')"
+echo "  Git: $(git --version 2>/dev/null || echo 'not installed')"
+echo "  GitHub CLI: $(gh --version 2>/dev/null | head -1 || echo 'not installed')"
+echo ""
+EOF
+chmod +x /usr/bin/dev-ashy-status
+
+# Create update script
+cat > /usr/bin/dev-ashy-update << 'EOF'
+#!/bin/bash
+echo "Updating Dev-Ashy OS..."
+apt-get update -qq
+apt-get upgrade -y -qq
+echo "Update complete!"
+EOF
+chmod +x /usr/bin/dev-ashy-update
+
+echo ""
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}  Setup Complete!${NC}"
+echo -e "${GREEN}========================================${NC}"
+echo ""
+echo "  Your Dev-Ashy OS is ready."
+echo ""
+echo "  Quick commands:"
+echo "    dev-ashy-status   — System status"
+echo "    dev-ashy-update   — Update system"
+echo ""
+echo "  Documentation: https://dev-ashy.com/docs"
+echo "  GitHub: https://github.com/Dev-Ashy"
+echo ""
+echo -e "${YELLOW}  Please reboot to apply all changes.${NC}"
+echo ""

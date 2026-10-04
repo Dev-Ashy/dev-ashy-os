@@ -1,0 +1,42 @@
+#!/bin/bash
+# Install creative tools
+# Usage: ./install-creative-tools
+
+set -e
+
+echo "Installing creative tools..."
+
+# Install FFmpeg
+apt-get install -y -qq ffmpeg
+
+# Install OBS Studio
+add-apt-repository -y ppa:obsproject/obs-studio
+apt-get update -qq
+apt-get install -y -qq obs-studio
+
+# Install GIMP
+apt-get install -y -qq gimp
+
+# Install Inkscape
+apt-get install -y -qq inkscape
+
+# Install Blender
+apt-get install -y -qq blender
+
+# Install Audacity
+apt-get install -y -qq audacity
+
+# Install Kdenlive
+apt-get install -y -qq kdenlive
+
+echo "Creative tools installed!"
+echo ""
+echo "Installed:"
+echo "  - FFmpeg (video/audio processing)"
+echo "  - OBS Studio (streaming/recording)"
+echo "  - GIMP (image editing)"
+echo "  - Inkscape (vector graphics)"
+echo "  - Blender (3D modeling)"
+echo "  - Audacity (audio editing)"
+echo "  - Kdenlive (video editing)"
+echo ""

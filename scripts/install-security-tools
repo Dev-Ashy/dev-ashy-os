@@ -1,0 +1,38 @@
+#!/bin/bash
+# Install security tools
+# Usage: ./install-security-tools
+
+set -e
+
+echo "Installing security tools..."
+
+# Install Kali tools (selective)
+apt-get install -y -qq \
+    nmap \
+    metasploit-framework \
+    sqlmap \
+    nikto \
+    dirb \
+    gobuster \
+    hydra \
+    john \
+    hashcat \
+    aircrack-ng \
+    wireshark \
+    tcpdump \
+    netcat \
+    socat \
+    steghide \
+    binwalk \
+    radare2 \
+    ghidra
+
+# Install Docker security tools
+docker pull aquasec/trivy
+docker pull anchore/grype
+
+echo "Security tools installed!"
+echo ""
+echo "Note: Some tools require root privileges."
+echo "Use 'sudo' when running security tools."
+echo ""

@@ -1,0 +1,101 @@
+#!/bin/bash
+# Verify Dev-Ashy OS ISO
+# Usage: ./verify-iso <iso-path>
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+ISO_PATH="${1:-$PROJECT_DIR/iso/Dev-Ashy-OS-0.1.0-amd64.iso}"
+
+if [ ! -f "$ISO_PATH" ]; then
+    echo "Error: ISO not found: $ISO_PATH"
+    exit 1
+fi
+
+echo "========================================"
+echo "  Dev-Ashy OS ISO Verification"
+echo "========================================"
+echo ""
+
+# Check ISO exists
+echo "[1/7] Checking ISO exists..."
+if [ -f "$ISO_PATH" ]; then
+    echo "  [OK] ISO found: $ISO_PATH"
+else
+    echo "  [FAIL] ISO not found"
+    exit 1
+fi
+
+# Check ISO size
+echo "[2/7] Checking ISO size..."
+ISO_SIZE=$(du -m "$ISO_PATH" | cut -f1)
+if [ "$ISO_SIZE" -gt 100 ]; then
+    echo "  [OK] ISO size: ${ISO_SIZE}MB"
+else
+    echo "  [WARN] ISO seems small: ${ISO_SIZE}MB"
+fi
+
+# Check ISO filesystem
+echo "[3/7] Checking ISO filesystem..."
+if command -v file >/dev/null 2>&1; then
+    ISO_TYPE=$(file "$ISO_PATH")
+    echo "  [OK] $ISO_TYPE"
+fi
+
+# Check checksum
+echo "[4/7] Verifying checksum..."
+ISO_DIR=$(dirname "$ISO_PATH")
+if [ -f "$ISO_DIR/SHA256SUMS" ]; then
+    cd "$ISO_DIR"
+    if sha256sum -c SHA256SUMS; then
+        echo "  [OK] Checksum verified"
+    else
+        echo "  [FAIL] Checksum mismatch"
+        exit 1
+    fi
+else
+    echo "  [WARN] No checksum file found"
+fi
+
+# Check ISO boot configuration
+echo "[5/7] Checking boot configuration..."
+if command -v xorriso >/dev/null 2>&1; then
+    if xorriso -indev "$ISO_PATH" -find / -name "*.cfg" 2>/dev/null | grep -q .; then
+        echo "  [OK] Boot configuration found"
+    else
+        echo "  [WARN] No boot configuration found"
+    fi
+fi
+
+# Check for Dev-Ashy files
+echo "[6/7] Checking Dev-Ashy branding..."
+if command -v xorriso >/dev/null 2>&1; then
+    if xorriso -indev "$ISO_PATH" -find / -name "*dev-ashy*" 2>/dev/null | grep -q .; then
+        echo "  [OK] Dev-Ashy files found"
+    else
+        echo "  [WARN] No Dev-Ashy files found"
+    fi
+fi
+
+# Check software manifest
+echo "[7/7] Checking software manifest..."
+if [ -f "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt" ]; then
+    echo "  [OK] Software manifest found"
+    PACKAGE_COUNT=$(grep -c "^[a-z]" "$ISO_DIR/ISO-SOFTWARE-MANIFEST.txt" || echo "0")
+    echo "  [OK] Packages listed: $PACKAGE_COUNT"
+else
+    echo "  [WARN] No software manifest found"
+fi
+
+echo ""
+echo "========================================"
+echo "  Verification Complete"
+echo "========================================"
+echo ""
+echo "ISO: $ISO_PATH"
+echo "Size: ${ISO_SIZE}MB"
+echo ""
+echo "Note: Full testing requires booting in QEMU."
+echo "Run: ./test-iso $ISO_PATH"
+echo ""

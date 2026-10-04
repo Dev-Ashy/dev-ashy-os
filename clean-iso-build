@@ -1,0 +1,26 @@
+#!/bin/bash
+# Clean ISO build artifacts
+# Usage: ./clean-iso-build
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+BUILD_DIR="$PROJECT_DIR/build"
+ISO_DIR="$PROJECT_DIR/iso"
+
+echo "Cleaning ISO build artifacts..."
+
+# Remove build directory
+if [ -d "$BUILD_DIR" ]; then
+    rm -rf "$BUILD_DIR"
+    echo "  [OK] Removed build directory"
+fi
+
+# Remove ISO directory
+if [ -d "$ISO_DIR" ]; then
+    rm -rf "$ISO_DIR"
+    echo "  [OK] Removed ISO directory"
+fi
+
+echo "Clean complete!"

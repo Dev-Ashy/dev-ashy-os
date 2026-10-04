@@ -1,0 +1,47 @@
+/* Dev-Ashy OS GTK Theme */
+
+@define-color bg_color #050508;
+@define-color fg_color #e2e8f0;
+@define-color base_color #0a0a12;
+@define-color text_color #e2e8f0;
+@define-color selected_bg_color #6366f1;
+@define-color selected_fg_color #ffffff;
+@define-color accent_color #6366f1;
+
+* {
+  background-color: @bg_color;
+  color: @fg_color;
+  border-color: #1e293b;
+}
+
+window {
+  background-color: @bg_color;
+}
+
+button {
+  background-color: @base_color;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+button:hover {
+  background-color: @selected_bg_color;
+  color: @selected_fg_color;
+}
+
+entry {
+  background-color: @base_color;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+menu {
+  background-color: @base_color;
+  border: 1px solid #1e293b;
+}
+
+menuitem:hover {
+  background-color: @selected_bg_color;
+}

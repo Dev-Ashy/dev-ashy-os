@@ -1,0 +1,43 @@
+#!/bin/bash
+# Install AI development tools
+# Usage: ./install-ai-tools
+
+set -e
+
+echo "Installing AI development tools..."
+
+# Install Ollama (if not already installed)
+if ! command -v ollama &>/dev/null; then
+    curl -fsSL https://ollama.com/install.sh | sh
+fi
+
+# Install Python AI libraries
+pip3 install --upgrade pip
+pip3 install \
+    numpy \
+    pandas \
+    scikit-learn \
+    tensorflow \
+    torch \
+    transformers \
+    langchain \
+    openai \
+    anthropic
+
+# Install Node.js AI libraries
+npm install -g @anthropic-ai/claude-code @google/gemini-cli
+
+echo "AI tools installed!"
+echo ""
+echo "To start Ollama:"
+echo "  ollama serve"
+echo ""
+echo "To pull a model:"
+echo "  ollama pull llama3.2"
+echo ""
+echo "To authenticate Gemini CLI:"
+echo "  gemini"
+echo ""
+echo "To authenticate Claude Code:"
+echo "  claude"
+echo ""

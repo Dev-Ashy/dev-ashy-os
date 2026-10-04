@@ -1,0 +1,126 @@
+Dev-Ashy OS — Third-Party Licenses
+
+This document lists important third-party components included in Dev-Ashy OS.
+
+## Base System
+
+| Component | License |
+|-----------|---------|
+| Ubuntu | GPL v2/v3 |
+| Linux Kernel | GPL v2 |
+| GNOME | GPL v2/v3 |
+| systemd | GPL v2/LGPL v2.1 |
+
+## Development Tools
+
+| Component | License |
+|-----------|---------|
+| Node.js | MIT |
+| npm | Artistic 2.0 |
+| pnpm | MIT |
+| Python | PSF |
+| Go | BSD |
+| Rust | MIT/Apache 2.0 |
+| Java (OpenJDK) | GPL v2 with Classpath Exception |
+| Git | GPL v2 |
+| GitHub CLI | MIT |
+
+## AI Tools
+
+| Component | License |
+|-----------|---------|
+| Ollama | MIT |
+| OpenAI | MIT |
+| Anthropic | MIT |
+| LangChain | MIT |
+| Transformers | Apache 2.0 |
+| PyTorch | BSD |
+| TensorFlow | Apache 2.0 |
+| NumPy | BSD |
+| Pandas | BSD |
+| Scikit-learn | BSD |
+
+## Security Tools
+
+| Component | License |
+|-----------|---------|
+| Nmap | GPL v2 |
+| Metasploit | BSD |
+| SQLMap | GPL v2 |
+| Nikto | GPL v2 |
+| Dirb | GPL v2 |
+| Gobuster | Apache 2.0 |
+| Hydra | GPL v2 |
+| John the Ripper | GPL v2 |
+| Hashcat | MIT |
+| Aircrack-ng | GPL v2 |
+| Wireshark | GPL v2 |
+| TCPDump | BSD |
+| Netcat | GPL v2 |
+| Socat | GPL v2 |
+| Steghide | GPL v2 |
+| Binwalk | MIT |
+| Radare2 | GPL v3 |
+| Ghidra | Apache 2.0 |
+
+## Creative Tools
+
+| Component | License |
+|-----------|---------|
+| FFmpeg | LGPL v2.1/GPL v2 |
+| OBS Studio | GPL v2 |
+| GIMP | GPL v3 |
+| Inkscape | GPL v3 |
+| Blender | GPL v3 |
+| Audacity | GPL v2 |
+| Kdenlive | GPL v2 |
+
+## Web Browsers
+
+| Component | License |
+|-----------|---------|
+| Firefox | MPL 2.0 |
+| Chromium | BSD |
+
+## Editors
+
+| Component | License |
+|-----------|---------|
+| VS Code | MIT |
+| Vim | Vim |
+| Neovim | Apache 2.0 |
+
+## System Tools
+
+| Component | License |
+|-----------|---------|
+| htop | GPL v2 |
+| tmux | ISC |
+| curl | MIT/X derivate |
+| wget | GPL v3 |
+| jq | MIT |
+| ripgrep | MIT |
+| fd | MIT/Apache 2.0 |
+| bat | MIT/Apache 2.0 |
+| exa | MIT |
+| zoxide | MIT |
+| fzf | MIT |
+| starship | MIT |
+
+## Fonts
+
+| Component | License |
+|-----------|---------|
+| Inter | OFL |
+| JetBrains Mono | OFL |
+| Space Grotesk | OFL |
+
+## Icons
+
+| Component | License |
+|-----------|---------|
+| Simple Icons | CC0 |
+
+## Note
+
+This is not an exhaustive list. Each package includes its own license information. See individual package documentation for complete license details.

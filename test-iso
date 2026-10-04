@@ -1,0 +1,50 @@
+#!/bin/bash
+# Test Dev-Ashy OS ISO in QEMU
+# Usage: ./test-iso <iso-path>
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+ISO_PATH="${1:-$PROJECT_DIR/iso/Dev-Ashy-OS-0.1.0-amd64.iso}"
+
+if [ ! -f "$ISO_PATH" ]; then
+    echo "Error: ISO not found: $ISO_PATH"
+    exit 1
+fi
+
+# Check for QEMU
+if ! command -v qemu-system-x86_64 >/dev/null 2>&1; then
+    echo "QEMU not found. Install with: sudo apt-get install qemu-system-x86"
+    exit 1
+fi
+
+# Create test directory
+TEST_DIR="$PROJECT_DIR/build/test"
+mkdir -p "$TEST_DIR"
+
+# Create disk image
+DISK_IMG="$TEST_DIR/test-disk.qcow2"
+if [ ! -f "$DISK_IMG" ]; then
+    qemu-img create -f qcow2 "$DISK_IMG" 20G
+fi
+
+echo "Starting QEMU test..."
+echo "ISO: $ISO_PATH"
+echo "Disk: $DISK_IMG"
+echo ""
+echo "Press Ctrl+A then X to exit QEMU"
+echo ""
+
+# Run QEMU
+qemu-system-x86_64 \
+    -m 4096 \
+    -smp 2 \
+    -cdrom "$ISO_PATH" \
+    -drive file="$DISK_IMG",format=qcow2 \
+    -boot d \
+    -net nic -net user \
+    -vga virtio \
+    -display sdl \
+    -rtc base=localtime \
+    "$@"
